@@ -1,0 +1,1 @@
+ghdl -a --ieee=synopsys --std=02 *.vhdl && ghdl -r --ieee=synopsys alutb --vcd=wave.vcd --stop-time=1000ns && start ./run.bat
