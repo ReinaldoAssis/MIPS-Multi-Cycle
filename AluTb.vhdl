@@ -10,27 +10,27 @@ USE ieee.std_logic_unsigned.ALL;
 USE IEEE.NUMERIC_STD.ALL;
 
 -- Instruction	funccode/Function	
--- add 	    100000	
--- addu 	100001	
+-- add 	    100000	    x 
+-- addu 	100001	    x
 -- addi 	001000	
--- and 	    100100	
+-- and 	    100100	    x
 -- andi 	001100	
 -- div 	    011010	
 -- divu 	011011	 
--- mult 	011000	
+-- mult 	011000	    x
 -- multu 	011001	
--- nor 	    100111	
--- or 	    100101	
--- ori 	    001101	
--- sll 	    000000	
--- sllv 	000100	
--- sra 	    000011	
--- srav 	000111	
--- srl 	    000010	
--- srlv 	000110	
--- sub 	    100010	
+-- nor 	    100111	    x
+-- or 	    100101	    x
+-- ori 	    001101	    x
+-- sll 	    000000	    x
+-- sllv 	000100      x
+-- sra 	    000011	    x
+-- srav 	000111	    x
+-- srl 	    000010	    x
+-- srlv 	000110	    x
+-- sub 	    100010	    x
 -- subu 	100011	
--- xor 	    100110	
+-- xor 	    100110	    x
 -- xori 	001110	
 
 entity alutb is
@@ -45,6 +45,7 @@ architecture behavior of alutb is
             func : in std_logic_vector(5 downto 0);
             shift : in std_logic_vector(4 downto 0);
             result : out std_logic_vector(31 downto 0);
+            highreg : out std_logic_vector(31 downto 0);
             zero : out std_logic
         );
     end component alu;
@@ -53,6 +54,7 @@ architecture behavior of alutb is
     signal func : std_logic_vector(5 downto 0);
     signal shift : std_logic_vector(4 downto 0);
     signal result : std_logic_vector(31 downto 0);
+    signal highreg : std_logic_vector(31 downto 0);
     signal zero : std_logic;
     signal clk : std_logic;
 
@@ -65,6 +67,7 @@ begin
             func => func,
             shift => shift,
             result => result,
+            highreg => highreg,
             zero => zero
         );
     
@@ -128,6 +131,58 @@ begin
             wait for 100 ns;
             assert result = "00000000000000000000000000000001" report "srl failed" severity error;
             assert zero = '0' report "srl failed" severity error;
+
+            a <= "10000000000000000000000000000111";
+            shift <= "00011";
+            func <= "000011"; -- sra
+            wait for 100 ns;
+            assert result = "11110000000000000000000000000000" report "sra failed" severity error;
+            assert zero = '0' report "sra failed" severity error;
+
+            a <= "00000000000000000000000001100111";
+            b <= "00000000000000000000000000000101";
+            func <= "100110"; -- xor
+            wait for 100 ns;
+            assert result = "00000000000000000000000001100010" report "xor failed" severity error;
+            assert zero = '0' report "xor failed" severity error;
+
+            func <= "100111"; -- nor
+            wait for 100 ns;
+            assert result = "11111111111111111111111110011000" report "nor failed" severity error;
+            assert zero = '0' report "nor failed" severity error;
+
+            func <= "000100"; -- sllv
+            wait for 100 ns;
+            assert result = "00000000000000000000110011100000" report "sllv failed" severity error;
+            assert zero = '0' report "sllv failed" severity error;
+
+            func <= "000110"; -- srlv
+            wait for 100 ns;
+            assert result = "00000000000000000000000000000011" report "srlv failed" severity error;
+            assert zero = '0' report "srlv failed" severity error;
+
+            a <= "10000000000000000000000000000111";
+            b <= "00000000000000000000000000000101";
+            func <= "000111"; -- srav
+            wait for 100 ns;
+            assert result = "11111100000000000000000000000000" report "srav failed" severity error;
+            assert zero = '0' report "srav failed" severity error;
+
+            
+            a <= "00000000000000000000000000000101";
+            b <= "00000000000000000000000000000010";
+            func <= "011000"; -- mult
+            wait for 100 ns;
+            assert highreg = "00000000000000000000000000000000" report "mult failed" severity error;
+            assert result = "00000000000000000000000000001010" report "mult failed" severity error;
+            assert zero = '0' report "mult failed" severity error;
+
+            func <= "011010"; -- div
+            wait for 100 ns;
+            assert highreg = "00000000000000000000000000000001" report "div failed" severity error;
+            assert result = "00000000000000000000000000000010" report "div failed" severity error;
+            assert zero = '0' report "div failed" severity error;
+
 
             wait;
         end process;

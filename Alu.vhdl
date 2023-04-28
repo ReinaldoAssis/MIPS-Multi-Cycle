@@ -40,6 +40,7 @@ entity alu is
         func : in std_logic_vector(5 downto 0);
         shift : in std_logic_vector(4 downto 0);
         result : out std_logic_vector(31 downto 0); --TODO: add overflow 
+        highreg : out std_logic_vector(31 downto 0);
         zero : out std_logic
     );
 end alu;
@@ -47,6 +48,9 @@ end alu;
 architecture rtl of alu is
     signal a_s, b_s : signed(31 downto 0);
     signal result_s : signed(31 downto 0);
+    signal multdiv_reg : signed(63 downto 0);
+
+
 
 begin
     a_s <= signed(a);
@@ -62,13 +66,14 @@ begin
                 when "000010" => -- srl
                     result_s <= a_s srl to_integer(unsigned(shift));
                 when "000011" => -- sra
-                    result_s <= a_s;
+                    -- duplicates the sign bit when shifting right
+                    result_s <= a_s sra to_integer(unsigned(shift));
                 when "000100" => -- sllv
-                    result_s <= a_s;
+                    result_s <= a_s sll to_integer(unsigned(b_s));
                 when "000110" => -- srlv
-                    result_s <= a_s;
+                    result_s <= a_s srl to_integer(unsigned(b_s));
                 when "000111" => -- srav
-                    result_s <= a_s;
+                    result_s <= a_s sra to_integer(unsigned(b_s));
                 when "001000" => -- addi
                     result_s <= a_s + b_s;
                 when "001001" => -- addiu
@@ -79,7 +84,7 @@ begin
 
                     -- the name addiu is a misnomer, because it does not add unsigned integers, instead it adds signed integers.
 
-                    result_s <= a_s + b_s; --TODO: dúvida, a e b são unsigned ou apenas b?
+                    result_s <= a_s + b_s; 
 
                 when "001100" => -- andi
                     result_s <= a_s and b_s;
@@ -88,13 +93,17 @@ begin
                 when "001110" => -- xori
                     result_s <= a_s xor b_s;
                 when "011000" => -- mult
-                    result_s <= a_s * b_s;
+                    multdiv_reg <= a_s * b_s;
+                    result_s <= multdiv_reg(31 downto 0);
                 when "011001" => -- multu
-                    result_s <= a_s * b_s;
+                    multdiv_reg <= a_s * b_s;
+                    result_s <= multdiv_reg(31 downto 0);
                 when "011010" => -- div
                     result_s <= a_s / b_s;
+                    multdiv_reg(63 downto 32) <= a_s mod b_s;
                 when "011011" => -- divu
                     result_s <= a_s / b_s;
+                    
                 when "100000" => -- add
                     result_s <= a_s + b_s;
                 when "100001" => -- addu
@@ -124,6 +133,8 @@ begin
             end if;
 
             result <= std_logic_vector(result_s);
+            highreg <= std_logic_vector(multdiv_reg(63 downto 32));
+
         end if;
     end process;
 end rtl;
