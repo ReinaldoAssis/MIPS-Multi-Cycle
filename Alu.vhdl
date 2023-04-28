@@ -103,6 +103,7 @@ begin
                     multdiv_reg(63 downto 32) <= a_s mod b_s;
                 when "011011" => -- divu
                     result_s <= a_s / b_s;
+                    multdiv_reg(63 downto 32) <= a_s mod b_s;
                     
                 when "100000" => -- add
                     result_s <= a_s + b_s;

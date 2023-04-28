@@ -12,13 +12,13 @@ USE IEEE.NUMERIC_STD.ALL;
 -- Instruction	funccode/Function	
 -- add 	    100000	    x 
 -- addu 	100001	    x
--- addi 	001000	
+-- addi 	001000	    x
 -- and 	    100100	    x
--- andi 	001100	
--- div 	    011010	
--- divu 	011011	 
+-- andi 	001100	    x
+-- div 	    011010	    x
+-- divu 	011011	    x
 -- mult 	011000	    x
--- multu 	011001	
+-- multu 	011001	    x
 -- nor 	    100111	    x
 -- or 	    100101	    x
 -- ori 	    001101	    x
@@ -29,9 +29,9 @@ USE IEEE.NUMERIC_STD.ALL;
 -- srl 	    000010	    x
 -- srlv 	000110	    x
 -- sub 	    100010	    x
--- subu 	100011	
+-- subu 	100011	    x
 -- xor 	    100110	    x
--- xori 	001110	
+-- xori 	001110	    x
 
 entity alutb is
 end alutb;
