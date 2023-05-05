@@ -20,7 +20,7 @@ entity unit is
     port (
         clk: in std_logic;
         opcode: in std_logic_vector(5 downto 0);
-        funct: in std_logic_vector(5 downto 0);
+        func: in std_logic_vector(5 downto 0);
         PCSrc: out std_logic;
         PCWriteCond: out std_logic;
         PCWrite: out std_logic;
