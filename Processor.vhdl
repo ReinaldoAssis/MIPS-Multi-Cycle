@@ -4,9 +4,11 @@
 -- Description: The central component for the MIPS Multicycle Processor
 -- Revision: 0.1
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.std_logic_unsigned.ALL;
+use ieee.numeric_std.all;
+USE IEEE.NUMERIC_STD.ALL;
 
 entity processor is 
 end processor;
@@ -99,8 +101,8 @@ architecture Behavioral of processor is
     signal regDst: std_logic;
     signal regWrite: std_logic;
     signal memToReg: std_logic;
-    signal memRead: std_logic;
-    signal memWrite: std_logic;
+    signal memRead: std_logic := '0';
+    signal memWrite: std_logic := '0';
     signal IorD: std_logic;
     signal instRegWrite: std_logic;
 
@@ -113,49 +115,23 @@ architecture Behavioral of processor is
     signal zero: std_logic;
 
     --Mem
-    signal memAddr: std_logic_vector(31 downto 0);
+    signal memAddr: std_logic_vector(31 downto 0) := (others => '0');
     signal memDatain: std_logic_vector(31 downto 0);
     signal memDataout: std_logic_vector(31 downto 0);
 
     --PC
-    signal PC: std_logic_vector(31 downto 0);
+    signal PC: std_logic_vector(31 downto 0) := (others => '0');
 
     --Instruction Register
-    signal IR: std_logic_vector(31 downto 0);
+    signal IR: std_logic_vector(31 downto 0) := (others => '0');
 
     --Control
-    signal stage: std_logic_vector(1 downto 0);
+    signal stage: std_logic_vector(1 downto 0) := "00";
+    signal start: std_logic := '0';
+    signal rt : std_logic_vector(4 downto 0);
+    signal rd : std_logic_vector(4 downto 0);
 
     begin
-
-    -- generates the clock
-    clk_process: 
-    process begin
-        clk <= '0';
-        wait for 10 ns;
-        clk <= '1';
-        wait for 10 ns;
-    end process;
-
-    --unit
-    -- ctrlunit: unit port map (
-    --     clk => clk,
-    --     opcode => opcode,
-    --     func => func,
-    --     PCSrc => PCSrc,
-    --     PCWriteCond => PCWriteCond,
-    --     PCWrite => PCWrite,
-    --     ALUCtrl => ALUCtrl,
-    --     AluSrcA => AluSrcA,
-    --     AluSrcB => AluSrcB,
-    --     RegDst => RegDst,
-    --     RegWrite => RegWrite,
-    --     MemToReg => MemToReg,
-    --     MemRead => memRead,
-    --     MemWrite => MemWrite,
-    --     IorD => IorD,
-    --     InstRegWrite => InstRegWrite
-    -- );
 
     alu1: alu port map (
         a => a,
@@ -177,7 +153,51 @@ architecture Behavioral of processor is
         data_out => memDataout
     );
 
-    if rising_edge(clk) then
+    -- generates the clock
+    clk_process: process begin
+        clk <= '0';
+        wait for 10 ns;
+        clk <= '1';
+        wait for 10 ns;
+    end process;
+    
+
+    --unit
+    -- ctrlunit: unit port map (
+    --     clk => clk,
+    --     opcode => opcode,
+    --     func => func,
+    --     PCSrc => PCSrc,
+    --     PCWriteCond => PCWriteCond,
+    --     PCWrite => PCWrite,
+    --     ALUCtrl => ALUCtrl,
+    --     AluSrcA => AluSrcA,
+    --     AluSrcB => AluSrcB,
+    --     RegDst => RegDst,
+    --     RegWrite => RegWrite,
+    --     MemToReg => MemToReg,
+    --     MemRead => memRead,
+    --     MemWrite => MemWrite,
+    --     IorD => IorD,
+    --     InstRegWrite => InstRegWrite
+    -- );
+
+    
+    process
+    begin
+
+    wait for 300 ns;
+
+    if rising_edge(clk) and start = '0' then -- idk why this condition is not being met AAAAA
+        memDatain <= x"00094020";
+        memWrite <= '1';
+
+        wait for 100 ns;
+
+        start <= '1';
+    end if;
+
+    if rising_edge(clk) and start = '1' then -- for some wild reason, start is not being set to 1
         
         --Fetch
         if stage = "00" then
@@ -187,20 +207,31 @@ architecture Behavioral of processor is
             IR <= memDataout;
             PC <= PC + 4;
             stage <= "01";
+
+            wait for 100 ns;
+
         
         --Decode
         elsif stage = "01" then
             opcode <= IR(31 downto 26);
             func <= IR(5 downto 0);
-            a <= IR(25 downto 21);
-            b <= IR(20 downto 16);
+            rt <= IR(25 downto 21);
+            rd <= IR(20 downto 16);
             shift <= IR(10 downto 6);
             stage <= "10";
 
             --Todo: calculate branch address
+            wait for 3000 ns;
+
+        end if;
 
 
     end if;
+
+    end process;
+
+end Behavioral;
+
 
 
 
